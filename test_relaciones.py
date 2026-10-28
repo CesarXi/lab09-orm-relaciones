@@ -1,7 +1,6 @@
 # test_relaciones.py
 from sqlalchemy import select
 
-# Línea de importación actualizada con EtiquetaModel
 from modelos import CategoriaModel, EtiquetaModel, ProductoModel
 
 
@@ -42,3 +41,18 @@ def test_relacion_muchos_a_muchos_producto_etiquetas(db_session):
         select(EtiquetaModel).filter_by(nombre="Oferta")
     ).first()
     assert tag_db.productos[0].nombre == "Cafetera"
+
+
+def test_eliminar_categoria_elimina_sus_productos(db_session):
+    cat_ropa = CategoriaModel(nombre="Ropa")
+    ProductoModel(nombre="Casaca", precio=120.0, categoria=cat_ropa)
+    db_session.add(cat_ropa)
+    db_session.commit()
+
+    db_session.delete(cat_ropa)
+    db_session.commit()
+
+    prod_db = db_session.scalars(
+        select(ProductoModel).filter_by(nombre="Casaca")
+    ).first()
+    assert prod_db is None
